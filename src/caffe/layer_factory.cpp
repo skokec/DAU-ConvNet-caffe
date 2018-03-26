@@ -16,6 +16,7 @@
 #include "caffe/layers/softmax_layer.hpp"
 #include "caffe/layers/tanh_layer.hpp"
 #include "caffe/proto/caffe.pb.h"
+#include "caffe/layers/dau_conv_layer.hpp"
 
 #ifdef USE_CUDNN
 #include "caffe/layers/cudnn_conv_layer.hpp"
@@ -302,6 +303,27 @@ shared_ptr<Layer<Dtype> > GetPythonLayer(const LayerParameter& param) {
 
 REGISTER_LAYER_CREATOR(Python, GetPythonLayer);
 #endif
+
+// Get convolution layer according to engine.
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > GetDAUConvolutionLayer(
+        const LayerParameter& param) {
+  ConvolutionParameter_Engine engine = param.convolution_param().engine();
+  if (engine == ConvolutionParameter_Engine_DEFAULT) {
+    engine = ConvolutionParameter_Engine_CAFFE;
+  }
+  if (engine == ConvolutionParameter_Engine_CAFFE) {
+    return shared_ptr<Layer<Dtype> >(new DAUConvolutionLayer<Dtype>(param));
+#ifdef USE_CUDNN
+  } else if (engine == ConvolutionParameter_Engine_CUDNN) {
+    return shared_ptr<Layer<Dtype> >(new DAUConvolutionLayer<Dtype>(param));
+#endif
+  } else {
+    LOG(FATAL) << "Layer " << param.name() << " has unknown engine.";
+  }
+}
+
+REGISTER_LAYER_CREATOR(DAUConvolution, GetDAUConvolutionLayer);
 
 // Layers that use their constructor as their default creator should be
 // registered in their corresponding cpp files. Do not register them here.

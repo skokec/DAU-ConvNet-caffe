@@ -1,0 +1,3 @@
+[submodule "3thparty/DAU-ConvNet"]
+	path = 3thparty/DAU-ConvNet
+	url = https://github.com/skokec/DAU-ConvNet.git

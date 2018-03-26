@@ -20,6 +20,15 @@ if(HAVE_CUDA)
   list(APPEND srcs ${cuda_objs} ${cuda})
 endif()
 
+# add pre-compiled objects from DAU-ConvNet library (.o files)
+list(APPEND srcs ${DAUConvNet_OBJS})
+
+# we need to manually add dependecny on .cu.o objects
+# by adding dummy output (real outputs will be created DAU-ConvNet target)
+add_custom_command(OUTPUT ${DAUConvNet_CU_OBJS}
+                    COMMAND echo
+                    DEPENDS ${DAUConvNet_OBJ_TARGET})
+
 add_library(caffe ${srcs})
 caffe_default_properties(caffe)
 target_link_libraries(caffe ${Caffe_LINKER_LIBS})
@@ -27,6 +36,10 @@ target_include_directories(caffe ${Caffe_INCLUDE_DIRS}
                                  PUBLIC
                                  $<BUILD_INTERFACE:${Caffe_INCLUDE_DIR}>
                                  $<INSTALL_INTERFACE:include>)
+
+# we also need to ensure to first compile DAU-ConvNet
+add_dependencies(caffe ${DAUConvNet_OBJ_TARGET})
+
 target_compile_definitions(caffe ${Caffe_DEFINITIONS})
 if(Caffe_COMPILE_OPTIONS)
   target_compile_options(caffe ${Caffe_COMPILE_OPTIONS})

@@ -26,6 +26,26 @@ include(cmake/Misc.cmake)
 include(cmake/Summary.cmake)
 include(cmake/ConfigGen.cmake)
 
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+
+
+SET(OPENMP_ENABLE TRUE CACHE BOOL "Enable OpenMP support")
+
+IF (OPENMP_ENABLE)
+FIND_PACKAGE(OpenMP) 
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+ENDIF (OPENMP_ENABLE)
+
 # ---[ Options
 caffe_option(CPU_ONLY  "Build Caffe without CUDA support" OFF) # TODO: rename to USE_CUDA
 caffe_option(USE_CUDNN "Build Caffe with cuDNN library support" ON IF NOT CPU_ONLY)
@@ -67,6 +87,26 @@ configure_file(cmake/Templates/caffe_config.h.in "${PROJECT_BINARY_DIR}/caffe_co
 set(Caffe_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set(Caffe_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_BINARY_DIR})
+
+# ---[ DAU-ConvNet
+
+# include DAU-ConvNet as subproject and compile it
+add_subdirectory(3thparty/DAU-ConvNet)
+
+# DAU-ConvNet project exposes the following varaibles:
+#  - DAUConvNet_OBJ_TARGET: name of object target (that can be used as dependency)
+#  - DAUConvNet_OBJS: pre-compiled .o objects (.cpp and .cu files)
+#  - DAUConvNet_CU_OBJS; pre-compiled .cu.o objects (only resutling CUDA objects !!)
+#  - DAUConvNet_INCLUDE_DIRS: include dirs of dependencies for DAU-ConvNet
+#  - DAUConvNet_LINKER_LIBS: linker libs of dependencies for DAU-ConvNet
+#  - DAUConvNet_INCLUDE_DIR: include dir for DAU-ConvNet (i.e. 3thparty/DAU-ConvNet/include)
+
+# we need to include both dependency dirs and include dir for DAU-ConvNet
+include_directories(${DAUConvNet_INCLUDE_DIRS})
+include_directories(${DAUConvNet_INCLUDE_DIR})
+
+list(APPEND Caffe_LINKER_LIBS ${DAUConvNet_LINKER_LIBS})
+caffe_list_unique(${Caffe_LINKER_LIBS})
 
 # ---[ Includes & defines for CUDA
 

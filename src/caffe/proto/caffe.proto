@@ -381,6 +381,7 @@ message LayerParameter {
   optional ConcatParameter concat_param = 104;
   optional ContrastiveLossParameter contrastive_loss_param = 105;
   optional ConvolutionParameter convolution_param = 106;
+  optional DAUConvolutionParameter dau_conv_param = 1106;
   optional CropParameter crop_param = 144;
   optional DataParameter data_param = 107;
   optional DropoutParameter dropout_param = 108;
@@ -593,7 +594,7 @@ message ConvolutionParameter {
   repeated uint32 stride = 6; // The stride; defaults to 1
   // Factor used to dilate the kernel, (implicitly) zero-filling the resulting
   // holes. (Kernel dilation is sometimes referred to by its use in the
-  // algorithme à trous from Holschneider et al. 1987.)
+  // algorithme a trous from Holschneider et al. 1987.)
   repeated uint32 dilation = 18; // The dilation; defaults to 1
 
   // For 2D convolution only, the *_h and *_w versions may also be used to
@@ -634,6 +635,44 @@ message ConvolutionParameter {
   // ignored and the ND implementation will be used.)
   optional bool force_nd_im2col = 17 [default = false];
 }
+
+message DAUConvolutionParameter {
+  optional uint32 num_output = 1; // The number of outputs for the layer
+  optional bool bias_term = 2 [default = true]; // whether to have bias terms
+
+  repeated uint32 number_units = 3; // The number of DAUs per channel/kernel
+
+  // Pad, kernel size, and stride are all given as a single value for equal
+  // dimensions in all spatial dimensions, or once per spatial dimension.
+  repeated uint32 pad = 4; // The padding size; defaults to 0
+  repeated uint32 kernel_size = 5; // The kernel size e.g, the max allowed unit displacement/offset
+  repeated uint32 stride = 6; // The stride; defaults to 1
+
+  optional FillerParameter weight_filler = 7; // The filler for the weight
+  optional FillerParameter bias_filler = 8; // The filler for the bias
+  optional FillerParameter mu_filler = 9; // The filler for the gaussian mean
+  optional FillerParameter sigma_filler = 10; // The filler for the gaussian sigma
+
+  optional bool unit_normalization = 11 [default = true]; // Should unit/gaussian be normalized or not  (i.e. area under gauss should sum to 1)
+  optional bool square_unit_normalization = 12 [default = false]; // normalize using sum of squares
+
+  optional uint32 mean_iteration_step = 13 [default = 1]; // step between optimization of mean in unit/gaussian
+  optional uint32 sigma_iteration_step = 14 [default = 1]; // step between optimization of sigma in unit/gaussian
+
+  optional float component_border_bound = 15 [default = 0]; // how close to kernel border is gaussian component allowed to be
+  optional float sigma_lower_bound = 16 [default = 0.1]; // lower bound for sigma
+
+  optional uint32 merge_iteration_step = 17 [default = 0]; // step between merging of gaussian components
+  optional float merge_threshold = 18 [default = 0]; // threshold for mering components
+
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;
+  }
+  optional Engine engine = 19 [default = DEFAULT];
+}
+
 
 message CropParameter {
   // To crop, elements of the first bottom are selected to fit the dimensions
