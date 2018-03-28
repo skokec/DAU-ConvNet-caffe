@@ -665,6 +665,10 @@ message DAUConvolutionParameter {
   optional uint32 merge_iteration_step = 17 [default = 0]; // step between merging of gaussian components
   optional float merge_threshold = 18 [default = 0]; // threshold for mering components
 
+  // for legacy version we can also save mu1,mu2 as not being centered around kernel center but
+  // instead in range [0 .. kernel_size ]
+  optional bool use_already_centered_offsets = 20 [default = true];
+
   enum Engine {
     DEFAULT = 0;
     CAFFE = 1;

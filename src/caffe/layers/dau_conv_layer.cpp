@@ -97,10 +97,10 @@ void DAUComponentInitializerCaffe<Dtype>::InitializeParameters(const DAUConvSett
         }
 
         // add offset to mean so that (0,0) is at center (we do not do this any more)
-        //int kernel_center_w = this->kernel_w_ / 2;
-        //int kernel_center_h = this->kernel_h_ / 2;
-        int kernel_center_w = 0;
-        int kernel_center_h = 0;
+        int kernel_center_w = settings.offsets_already_centered ? kernel_w / 2 : 0;
+        int kernel_center_h = settings.offsets_already_centered ? kernel_h / 2 : 0;
+        //int kernel_center_w = 0;
+        //int kernel_center_h = 0;
 
 
         for (int i1 = 0; i1 < outer_size; ++i1) {
@@ -441,6 +441,8 @@ void DAUConvolutionLayer<Dtype>::LayerSetUp(
 
     dau_settings.sigma_lower_bound = param.sigma_lower_bound();
     dau_settings.component_border_bound = param.component_border_bound();
+
+    dau_settings.offsets_already_centered = param.use_already_centered_offsets();
 
     // define which param initializer will be used
     DAUComponentInitializerCaffe<Dtype> param_initializer(param.weight_filler(),

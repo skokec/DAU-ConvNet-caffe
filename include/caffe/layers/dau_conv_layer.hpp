@@ -104,58 +104,7 @@ private:
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// GPU version of Caffe buffers used in DAUKernel*
-/*
-template <typename Dtype>
-class DAUKernelParamsGPU : public  DAUKernelParams<Dtype> {
-public:
-
-};
-
-template <typename Dtype>
-class DAUKernelOutputGPU : public DAUKernelOutput<Dtype> {
-public:
-
-};
-
-template <typename Dtype>
-class DAUKernelCompute : public DAUKernelCompute<Dtype> {
-public:
-
-
-};
-
-//
-template <typename Dtype>
-class DAUKernelParamsCPU : public  DAUKernelParams<Dtype> {
-public:
-
-    virtual Dtype* weight() { return this->weight_->mutable_cpu_data(); }
-    virtual Dtype* mu1() { return this->mu1_->mutable_cpu_data(); }
-    virtual Dtype* mu2() { return this->mu2_->mutable_cpu_data(); }
-    virtual Dtype* sigma() { return this->sigma_->mutable_cpu_data(); }
-};
-
-template <typename Dtype>
-class DAUKernelOutputCPU : public DAUKernelOutput<Dtype> {
-public:
-    virtual Dtype* weight() { return this->weight_.mutable_cpu_data(); }
-    virtual Dtype* d_error() { return this->d_error_.mutable_cpu_data(); }
-    virtual Dtype* d_params() { return this->d_params_.mutable_cpu_data(); }
-};
-
-template <typename Dtype>
-class DAUKernelComputeCPU : public DAUKernelCompute<Dtype> {
-public:
-
-    virtual Dtype* param_temp(typename BaseDAUKernelCompute<Dtype>::Param_IDX index) { return this->param_buffers_[index]->mutable_cpu_data(); }
-    virtual Dtype* kernels_temp(typename BaseDAUKernelCompute<Dtype>::Kernel_IDX index) { return this->param_buffers_[index]->mutable_cpu_data(); }
-    virtual int* precomp_index() { return this->tmp_precomp_index_.mutable_gpu_data(); }
-
-};
-*/
-////////////////////////////////////////////////////////////////////////////////
-// Caffe GPU version of DAUConvolution layer (BaseDAUConvLayer)
+// Caffe version of DAUConvolution layer (BaseDAUConvLayer and BaseDAUComponentInitializer)
 
 template <typename Dtype>
 class DAUComponentInitializerCaffe : public BaseDAUComponentInitializer<Dtype> {
